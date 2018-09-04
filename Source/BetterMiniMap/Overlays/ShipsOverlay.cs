@@ -23,5 +23,11 @@ namespace BetterMiniMap.Overlays
         }
 
         public new void ExposeData() => this.ExposeData("overlayShips");
+
+        public override void Render()
+        {
+            foreach (Thing current in this.GetThings())
+                this.CreateMarker(current);
+        }
     }
 }
