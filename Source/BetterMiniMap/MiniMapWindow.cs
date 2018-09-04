@@ -20,7 +20,7 @@ namespace BetterMiniMap
 
         private int tileHash = 0;
 
-        private MiniMapControls controls;
+        private readonly MiniMapControls controls;
 
         private Vector2 position;
         private Vector2 size;
@@ -70,6 +70,8 @@ namespace BetterMiniMap
             foreach(Overlay overlay in OverlayManager.Overlays)
                 this.overlays.Add(overlay);
 
+            this.overlays.Add(OverlayManager.ShipOverlay);
+
             this.overlays.Add(OverlayManager.FogOverlay);
             this.overlays.Add(OverlayManager.ViewpointOverlay);
         }
@@ -84,6 +86,8 @@ namespace BetterMiniMap
                 new FloatMenuCheckBox(OverlayManager.PowerOverlay, "BMM_PowerGridOverlayLabel".Translate()),
                 new FloatMenuCheckBox(OverlayManager.MiningOverlay, "BMM_MiningOverlayLabel".Translate()),
                 new FloatMenuCheckBox(OverlayManager.TerrainOverlay, "BMM_TerrainOverlayLabel".Translate()),
+
+                new FloatMenuCheckBox(OverlayManager.ShipOverlay, "Ships Overlay"),
             };
 
             foreach (Overlay overlay in OverlayManager.Overlays)

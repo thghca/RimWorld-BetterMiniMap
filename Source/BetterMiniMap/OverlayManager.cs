@@ -18,6 +18,8 @@ namespace BetterMiniMap
         public static ViewpointOverlay ViewpointOverlay;
         public static AreaOverlay AreaOverlay;
 
+        public static ShipsOverlay ShipOverlay;
+
         public static List<Overlay> Overlays;
 
         static OverlayManager()
@@ -29,6 +31,8 @@ namespace BetterMiniMap
             TerrainOverlay = new TerrainOverlay();
             ViewpointOverlay = new ViewpointOverlay();
             AreaOverlay = new AreaOverlay();
+
+            ShipOverlay = new ShipsOverlay();
             
             // handle OverlayDefs
             OverlayManager.Overlays = new List<Overlay>();
