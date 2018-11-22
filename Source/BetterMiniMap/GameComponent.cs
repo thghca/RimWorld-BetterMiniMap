@@ -102,7 +102,7 @@ namespace BetterMiniMap
 
         static void CurrentMap_Prefix(Game __instance, Map value)
         {
-            if (__instance.currentMapIndex >= 0)
+            if (__instance.currentMapIndex >= 0 && __instance.Maps.Contains(value))
                 MiniMapManager.SetMap(value);
         }
 
