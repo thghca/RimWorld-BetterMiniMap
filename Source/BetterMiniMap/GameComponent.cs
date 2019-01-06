@@ -23,6 +23,7 @@ namespace BetterMiniMap
         public MiniMap_GameComponent(Game g) : this() { }
         public MiniMap_GameComponent()
         {
+            BetterMiniMapMod.InitSettingsIfNeed();
             miniMapManager = new MiniMapManager();
         }
 
@@ -36,23 +37,8 @@ namespace BetterMiniMap
             // used for toggling minimap 
             researchPal = ModLister.AllInstalledMods.FirstOrDefault(m => m.Name == "ResearchPal")?.Active == true;
             relationsTab = ModLister.AllInstalledMods.FirstOrDefault(m => m.Name == "Relations Tab")?.Active == true;
-
-            HarmonyInstance harmony = HarmonyInstance.Create("rimworld.whyisthat.betterminimap.gamecomponent");
-            //harmony.Patch(AccessTools.Method(typeof(MainTabsRoot), nameof(MainTabsRoot.ToggleTab)), null, new HarmonyMethod(typeof(MiniMap_GameComponent), nameof(ToggleMiniMap)));
-            //harmony.Patch(AccessTools.Method(typeof(MainButtonWorker_ToggleWorld), nameof(MainButtonWorker_ToggleWorld.Activate)), null, new HarmonyMethod(typeof(MiniMap_GameComponent), nameof(ToggleMiniMap_WorldTab)));
-
-            if (BetterMiniMapMod.modSettings.singleMode)
-            {
-                harmony.Patch(AccessTools.Property(typeof(Game), nameof(Game.CurrentMap)).GetSetMethod(), new HarmonyMethod(typeof(MiniMap_GameComponent), nameof(CurrentMap_Prefix)));
-            }
-            else
-            {
-                harmony.Patch(AccessTools.Method(typeof(Game), nameof(Game.AddMap)), null, new HarmonyMethod(typeof(MiniMap_GameComponent), nameof(AddMiniMap)));
-                harmony.Patch(AccessTools.Method(typeof(Game), nameof(Game.DeinitAndRemoveMap)), new HarmonyMethod(typeof(MiniMap_GameComponent), nameof(RemoveMiniMap)));
-                harmony.Patch(AccessTools.Method(typeof(PlaySettings), nameof(PlaySettings.DoPlaySettingsGlobalControls)), new HarmonyMethod(typeof(MiniMap_GameComponent), nameof(PlaySettings_DoPlaySettingsGlobalControls_Prefix)));
-            }
         }
-        
+
         #region HarmonyPatches
 
         /*static void ToggleMiniMap(MainTabsRoot __instance, MainButtonDef newTab)
@@ -91,18 +77,27 @@ namespace BetterMiniMap
                 MiniMap.Toggle(!WorldRendererUtility.WorldRenderedNow);
         }*/
 
-        static void AddMiniMap(Map map) => miniMapManager.AddMiniMap(map);
-        static void RemoveMiniMap(Map map) => miniMapManager.RemoveMiniMap(map);
+        static void AddMiniMap(Map map)
+        {
+            if (!BetterMiniMapMod.modSettings.singleMode)
+                miniMapManager.AddMiniMap(map);
+        }
+
+        static void RemoveMiniMap(Map map)
+        {
+            if (!BetterMiniMapMod.modSettings.singleMode)
+                miniMapManager.RemoveMiniMap(map);
+        }
 
         static void PlaySettings_DoPlaySettingsGlobalControls_Prefix(WidgetRow row, bool worldView)
         {
-            if (row.ButtonIcon(MiniMapTextures.MapManagerIcon))
+            if (!BetterMiniMapMod.modSettings.singleMode && row.ButtonIcon(MiniMapTextures.MapManagerIcon))
                 Find.WindowStack.Add(MiniMapManager.MiniMapMenu);
         }
 
         static void CurrentMap_Prefix(Game __instance, Map value)
         {
-            if (__instance.currentMapIndex >= 0 && __instance.currentMapIndex < __instance.Maps.Count && __instance.Maps.Contains(value))
+            if (BetterMiniMapMod.modSettings.singleMode && __instance.currentMapIndex >= 0 && __instance.currentMapIndex < __instance.Maps.Count && __instance.Maps.Contains(value))
                 MiniMapManager.SetMap(value);
         }
 

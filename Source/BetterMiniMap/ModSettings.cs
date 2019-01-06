@@ -7,6 +7,7 @@ using SettingsHelper;
 using static BetterMiniMap.BetterMiniMapSettings;
 using Harmony;
 using ColourPicker;
+using RimWorld;
 
 namespace BetterMiniMap
 {
@@ -247,17 +248,31 @@ namespace BetterMiniMap
         static BetterMiniMapMod()
         {
             HarmonyInstance harmony = HarmonyInstance.Create("rimworld.whyisthat.betterminimap.init");
+            harmony.Patch(AccessTools.Property(typeof(Game), "CurrentMap").GetSetMethod(), new HarmonyMethod(typeof(MiniMap_GameComponent), "CurrentMap_Prefix", null), null, null);
+            harmony.Patch(AccessTools.Method(typeof(Game), "AddMap", null, null), null, new HarmonyMethod(typeof(MiniMap_GameComponent), "AddMiniMap", null), null);
+            harmony.Patch(AccessTools.Method(typeof(Game), "DeinitAndRemoveMap", null, null), new HarmonyMethod(typeof(MiniMap_GameComponent), "RemoveMiniMap", null), null, null);
+            harmony.Patch(AccessTools.Method(typeof(PlaySettings), "DoPlaySettingsGlobalControls", null, null), new HarmonyMethod(typeof(MiniMap_GameComponent), "PlaySettings_DoPlaySettingsGlobalControls_Prefix", null), null, null);
             harmony.Patch(AccessTools.Method(typeof(UIRoot_Entry), nameof(UIRoot_Entry.Init)), null, new HarmonyMethod(typeof(BetterMiniMapMod), nameof(DefsLoaded)));
+            //harmony.Patch(AccessTools.Method(typeof(MainTabsRoot), nameof(MainTabsRoot.ToggleTab)), null, new HarmonyMethod(typeof(MiniMap_GameComponent), nameof(ToggleMiniMap)));
+            //harmony.Patch(AccessTools.Method(typeof(MainButtonWorker_ToggleWorld), nameof(MainButtonWorker_ToggleWorld.Activate)), null, new HarmonyMethod(typeof(MiniMap_GameComponent), nameof(ToggleMiniMap_WorldTab)));
         }
 
         // NOTE: this occurs before HugsLib's DefsLoadded... but the defs are loaded...
-        public static void DefsLoaded() => OverlaySettingDatabase.InitializeOverlaySettings();
+        public static void DefsLoaded(){}
         #endregion
+
+        public static void InitSettingsIfNeed()
+        {
+            if (BetterMiniMapMod.modSettings == null)
+            {
+                OverlaySettingDatabase.InitializeOverlaySettings();
+                BetterMiniMapMod.modSettings = LoadedModManager.GetMod<BetterMiniMapMod>().GetSettings<BetterMiniMapSettings>();
+            }
+        }
 
         public BetterMiniMapMod(ModContentPack content) : base(content)
         {
             //modSettings.rootDir = content.RootDir;
-            modSettings = GetSettings<BetterMiniMapSettings>();
             ListingStandardHelper.Gap = 10f;
         }
 
@@ -265,6 +280,8 @@ namespace BetterMiniMap
 
         public override void DoSettingsWindowContents(Rect rect)
         {
+            BetterMiniMapMod.InitSettingsIfNeed();
+
             rect.height += 50f;
             Listing_Standard listing_Standard = rect.BeginListingStandard();
 
