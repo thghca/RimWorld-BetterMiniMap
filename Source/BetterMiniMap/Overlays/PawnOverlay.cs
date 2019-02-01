@@ -13,7 +13,7 @@ namespace BetterMiniMap.Overlays
             this.def = def;
         }
 
-        public void ExposeData() => this.ExposeData(this.def.label);
+        public void ExposeData() => this.ExposeData(this.def.defName);
         public IEnumerable<Pawn> GetPawns() => this.map.mapPawns.AllPawns.Where(p => this.def.IsValid(p, this.map));
         public override int GetUpdateInterval() => OverlaySettingDatabase.GetOverlaySettings(this.def.defName).updatePeriod;
 
